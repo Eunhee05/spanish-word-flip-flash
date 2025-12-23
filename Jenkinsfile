@@ -14,8 +14,6 @@ pipeline {
             }
             steps {
                 sh 'npm ci'
-                // build 스크립트가 없으므로 주석 처리 유지
-                // sh 'npm run build'
             }
         }
 
@@ -29,7 +27,6 @@ pipeline {
                         }
                     }
                     steps {
-                        // Vitest 대신 Playwright를 이용한 API 테스트만 실행하도록 수정
                         sh 'npx playwright test api-tests'
                     }
                 }
@@ -37,7 +34,7 @@ pipeline {
                 stage('Integration Tests') {
                     agent {
                         docker {
-                            // 버전을 1.57.0으로 업데이트
+                            // 이전 빌드 에러를 방지하기 위해 1.57.0 버전 사용
                             image 'mcr.microsoft.com/playwright:v1.57.0-noble'
                             reuseNode true
                         }
@@ -47,6 +44,35 @@ pipeline {
                     }
                 }
             }            
+        }
+
+        stage('e2e Tests') {
+            agent {
+                docker {
+                    image 'mcr.microsoft.com/playwright:v1.57.0-noble'
+                    reuseNode true
+                }
+            }
+            environment {
+                E2E_BASE_URL = 'https://spanish-cards.netlify.app'
+            }
+            steps {
+                sh 'npx playwright test'
+            }
+            post {
+                always {
+                    // 79번 가이드: 테스트 결과 리포트 게시
+                    junit '**/test-results/*.xml'
+                    publishHTML(target: [
+                        allowMissing: false,
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true,
+                        reportDir: 'playwright-report',
+                        reportFiles: 'index.html',
+                        reportName: 'Playwright HTML Report'
+                    ])
+                }
+            }
         }
 
         stage('Deploy') {
