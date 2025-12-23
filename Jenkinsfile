@@ -66,11 +66,12 @@ pipeline {
                     publishHTML(target: [
                         allowMissing: false,
                         alwaysLinkToLastBuild: true,
-                        keepAll: true,
+                        keepAll: false,
                         reportDir: 'playwright-report',
                         reportFiles: 'index.html',
                         reportName: 'Playwright HTML Report'
                     ])
+                    junit '**/results.xml'
                 }
             }
         }
