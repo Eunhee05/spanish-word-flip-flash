@@ -62,7 +62,7 @@ pipeline {
             post {
                 always {
                     // 79번 가이드: 테스트 결과 리포트 게시
-                    junit '**/test-results/*.xml'
+                    junit '**/results.xml'
                     publishHTML(target: [
                         allowMissing: false,
                         alwaysLinkToLastBuild: true,
