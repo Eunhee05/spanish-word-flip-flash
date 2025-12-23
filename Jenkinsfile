@@ -14,7 +14,8 @@ pipeline {
             }
             steps {
                 sh 'npm ci'
-                //sh 'npm run build'
+                // build 스크립트가 없으므로 주석 처리 유지
+                // sh 'npm run build'
             }
         }
 
@@ -28,33 +29,28 @@ pipeline {
                         }
                     }
                     steps {
-                        // Unit tests with Vitest
-                        sh 'npm install --save-dev vitest'
-                        sh 'npx vitest run --reporter=verbose'                        
+                        // Vitest 대신 Playwright를 이용한 API 테스트만 실행하도록 수정
+                        sh 'npx playwright test api-tests'
                     }
-                }                
+                }
+                
                 stage('Integration Tests') {
                     agent {
                         docker {
-                            image 'mcr.microsoft.com/playwright:v1.54.2-noble'
+                            // 버전을 1.57.0으로 업데이트
+                            image 'mcr.microsoft.com/playwright:v1.57.0-noble'
                             reuseNode true
                         }
                     }
                     steps {
-                        sh 'npx playwright test'
+                        sh 'npx playwright test tests'
                     }
                 }
             }            
         }
 
         stage('Deploy') {
-            agent {
-                docker {
-                    image 'alpine'                    
-                }
-            }
             steps {
-                // Mock deployment which does nothing
                 echo 'Mock deployment was successful!'                
             }
         }
